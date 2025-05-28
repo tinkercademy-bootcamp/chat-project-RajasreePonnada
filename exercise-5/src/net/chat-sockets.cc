@@ -12,3 +12,4 @@ sockaddr_in tt::chat::net::create_address(int port) {
   address.sin_port = htons(port);
   return address;
 }
+
