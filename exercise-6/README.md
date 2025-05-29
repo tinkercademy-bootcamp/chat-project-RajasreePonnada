@@ -85,5 +85,16 @@ LDFLAGS := -static -fsanitize=address -lspdlog -lfmt
 ## C++ Package Managers
 
 - Why are there so many C++ package managers?
+
+Ans. Because C++ has no official package manager, and a wide variety of toolchains (GCC, Clang) and low-lvel control is intended sometimes.
+#
 - Which one is the best one?
+
+Ans. Conan strikes the best balance of ease of use, cross-platform support, prebuilt packages and flexibility across different build systems than other managers like vcpkg and hunter.
+#
 - Which are the most notable ways to manage the compilation of C++ projects?
+
+Ans. CMake and Makefile are popularly used to manage the compilation of C++ projects
+
+ 
+#
