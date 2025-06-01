@@ -1,38 +1,52 @@
-#include <arpa/inet.h>
+// #include <arpa/inet.h>
 #include <cstdlib>
-#include <iostream>
-#include <netinet/in.h>
-#include <string>
+// #include <iostream>
+// #include <netinet/in.h>
+// #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h>
+// #include <unistd.h>
 
 #include "client/chat-client.h"
 
-namespace {
-std::string read_args(int argc, char *argv[]) {
-  using namespace tt::chat;
-  std::string message = "Hello from client";
-  if (argc == 1) {
-    std::cout << "Usage: " << argv[0] << " <message>\n";
-    exit(EXIT_FAILURE);
+#include <iostream>
+#include <string>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <thread>
+
+void read_loop(int sock) {
+  char buffer[1024];
+  while (true) {
+    ssize_t n = read(sock, buffer, sizeof(buffer) - 1);
+    if (n > 0) {
+      buffer[n] = '\0';
+      std::cout << "\n" << buffer << std::endl;
+      std::cout << "> " << std::flush;  // prompt user again
+    }
   }
-  if (argc > 1) {
-    message = argv[1];
-  }
-  return message;
 }
-} // namespace
 
-int main(int argc, char *argv[]) {
-  const int kPort = 8080;
-  const std::string kServerAddress = "127.0.0.1";
+int main() {
+  const int port = 8080;
+  const char* server_ip = "127.0.0.1";
 
-  std::string message = read_args(argc, argv);
+  int sock = socket(AF_INET, SOCK_STREAM, 0);
+  sockaddr_in server_addr{};
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port = htons(port);
+  inet_pton(AF_INET, server_ip, &server_addr.sin_addr);
+  connect(sock, (sockaddr*)&server_addr, sizeof(server_addr));
 
-  tt::chat::client::Client client{kPort, kServerAddress};
+  std::thread reader(read_loop, sock);
 
-  std::string response = client.send_and_receive_message(message);
+  std::string line;
+  while (std::getline(std::cin, line)) {
+    send(sock, line.c_str(), line.size(), 0);
+  }
 
+  reader.join();
+  close(sock);
   return 0;
 }
