@@ -1,0 +1,34 @@
+#include "epoll-server.h"
+#include "../utils.h"
+#include "../net/chat-sockets.h"
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <iostream>
+#include <cstring>
+
+namespace tt::chat::server {
+
+EpollServer::EpollServer(int port) {
+  setup_server_socket(port);
+  
+}
+
+EpollServer::~EpollServer() {
+  close(listen_sock_);
+}
+
+void EpollServer::setup_server_socket(int port) {
+  listen_sock_ = net::create_socket();
+  sockaddr_in address = net::create_address(port);
+  address.sin_addr.s_addr = INADDR_ANY;
+
+  int opt = 1;
+  setsockopt(listen_sock_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+  check_error(bind(listen_sock_, (sockaddr *)&address, sizeof(address)) < 0, "bind failed");
+  check_error(listen(listen_sock_, 10) < 0, "listen failed");
+}
+
+
+
+} // namespace tt::chat::server
