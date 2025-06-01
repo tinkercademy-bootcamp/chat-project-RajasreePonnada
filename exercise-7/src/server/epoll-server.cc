@@ -15,6 +15,9 @@ EpollServer::EpollServer(int port) {
   epoll_fd_ = epoll_create1(0);
   check_error(epoll_fd_ < 0, "epoll_create1 failed");
 
+  // Initialize the ChannelManager
+  channel_mgr_ = std::make_unique<ChannelManager>();
+
   epoll_event ev{};
   ev.events = EPOLLIN;
   ev.data.fd = listen_sock_;
