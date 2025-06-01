@@ -19,6 +19,8 @@ private:
 
   
   static constexpr int kBufferSize = 1024;
+  static constexpr int kMaxEvents = 64;
+
 
   std::unordered_map<int, std::string> client_usernames_;
 
