@@ -47,7 +47,7 @@ int main() {
   // --- Init ncurses ---
   initscr();
   cbreak();
-  noecho();
+  echo();
   int height = LINES - 3;
   chat_win = newwin(height, COLS, 0, 0);
   input_win = newwin(3, COLS, height, 0);
