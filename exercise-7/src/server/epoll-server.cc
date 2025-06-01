@@ -52,6 +52,12 @@ void EpollServer::handle_new_connection() {
   check_error(epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client_sock, &ev) < 0, "epoll_ctl client_sock");
 
   client_usernames_[client_sock] = "user_" + std::to_string(client_sock);  // temporary username
+}
+
+void EpollServer::assign_username(int client_sock, const std::string& desired_name) {
+  usernames_[client_sock] = desired_name;
+  std::string welcome = "Welcome, " + desired_name + "!\n";
+  send(client_sock, welcome.c_str(), welcome.size(), 0);
   }
 
 void EpollServer::handle_client_data(int client_sock) {
