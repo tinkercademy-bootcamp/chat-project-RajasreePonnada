@@ -29,6 +29,14 @@ void EpollServer::setup_server_socket(int port) {
   check_error(listen(listen_sock_, 10) < 0, "listen failed");
 }
 
+void EpollServer::handle_new_connection() {
+  sockaddr_in client_addr;
+  socklen_t addrlen = sizeof(client_addr);
+  int client_sock = accept(listen_sock_, (sockaddr *)&client_addr, &addrlen);
+  check_error(client_sock < 0, "accept failed");
+
+  }
+
 
 
 } // namespace tt::chat::server
