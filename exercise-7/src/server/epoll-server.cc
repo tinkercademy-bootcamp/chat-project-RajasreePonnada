@@ -45,6 +45,12 @@ void EpollServer::handle_new_connection() {
   int client_sock = accept(listen_sock_, (sockaddr *)&client_addr, &addrlen);
   check_error(client_sock < 0, "accept failed");
 
+  epoll_event ev{};
+  ev.events = EPOLLIN;
+  ev.data.fd = client_sock;
+  check_error(epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client_sock, &ev) < 0, "epoll_ctl client_sock");
+
+
   }
 
 void EpollServer::handle_client_data(int client_sock) {
