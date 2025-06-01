@@ -37,6 +37,10 @@ private:
   void handle_client_data(int client_sock);
 
   void assign_username(int client_sock, const std::string &desired_name);
+
+  void broadcast_message(const std::string &message, int sender_fd);
+  void broadcast_to_channel(const std::string &channel, const std::string &msg, int sender_fd);
+  
   };
 
 }
