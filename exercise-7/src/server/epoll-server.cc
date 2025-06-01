@@ -11,11 +11,21 @@ namespace tt::chat::server {
 
 EpollServer::EpollServer(int port) {
   setup_server_socket(port);
+
+  epoll_fd_ = epoll_create1(0);
+  check_error(epoll_fd_ < 0, "epoll_create1 failed");
+
+  epoll_event ev{};
+  ev.events = EPOLLIN;
+  ev.data.fd = listen_sock_;
+  check_error(epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, listen_sock_, &ev) < 0,
+              "epoll_ctl listen_sock");
   
 }
 
 EpollServer::~EpollServer() {
   close(listen_sock_);
+  close(epoll_fd_);
 }
 
 void EpollServer::setup_server_socket(int port) {
