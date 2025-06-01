@@ -20,6 +20,7 @@ EpollServer::EpollServer(int port) {
   ev.data.fd = listen_sock_;
   check_error(epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, listen_sock_, &ev) < 0,
               "epoll_ctl listen_sock");
+
   
 }
 
@@ -50,7 +51,7 @@ void EpollServer::handle_new_connection() {
   ev.data.fd = client_sock;
   check_error(epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client_sock, &ev) < 0, "epoll_ctl client_sock");
 
-
+  client_usernames_[client_sock] = "user_" + std::to_string(client_sock);  // temporary username
   }
 
 void EpollServer::handle_client_data(int client_sock) {
