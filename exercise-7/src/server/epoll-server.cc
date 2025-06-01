@@ -2,6 +2,9 @@
 #include "../utils.h"
 #include "../net/chat-sockets.h"
 
+#include "channel_manager.h"
+
+#include <spdlog/spdlog.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <iostream>
