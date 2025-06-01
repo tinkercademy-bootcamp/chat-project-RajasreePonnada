@@ -71,6 +71,21 @@ void EpollServer::handle_client_data(int client_sock) {
   
 }
 
+void EpollServer::broadcast_to_channel(const std::string &channel, const std::string &msg, int sender_fd) {
+  for (int fd : channel_mgr_->get_members(channel)) {
+    if (fd != sender_fd) {
+      send(fd, msg.c_str(), msg.size(), 0);
+    }
+  }
+}
+
+void EpollServer::broadcast_message(const std::string &message, int sender_fd) {
+  for (const auto &[fd, name] : client_usernames_) {
+    if (fd != sender_fd) {
+      send(fd, message.c_str(), message.size(), 0);
+    }
+  }
+}
 void EpollServer::run() {
   SPDLOG_INFO("Server started with epoll");
   epoll_event events[kMaxEvents];
