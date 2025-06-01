@@ -86,7 +86,21 @@ void EpollServer::handle_client_data(int client_sock) {
     channel_mgr_->join_channel(ch, client_sock);
     client_channels_[client_sock] = ch;
     send(client_sock, "Channel created.\n", 17, 0);
-  }else {
+  } else if (msg.rfind("/join ", 0) == 0) {
+    std::string ch = msg.substr(6);
+    if (!channel_mgr_->has_channel(ch)) {
+      send(client_sock, "Channel not found.\n", 19, 0);
+      return;
+    }
+    channel_mgr_->join_channel(ch, client_sock);
+    client_channels_[client_sock] = ch;
+    send(client_sock, "Joined channel.\n", 16, 0);
+  } else if (msg.rfind("/list", 0) == 0) {
+    auto list = channel_mgr_->list_channels();
+    std::string out = "Channels:\n";
+    for (auto &ch : list) out += "- " + ch + "\n";
+    send(client_sock, out.c_str(), out.size(), 0);
+  } else {
     std::string user = usernames_[client_sock];
     std::string ch = client_channels_[client_sock];
     if (ch.empty()) {
