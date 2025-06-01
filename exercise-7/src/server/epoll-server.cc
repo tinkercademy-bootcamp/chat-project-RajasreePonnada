@@ -64,5 +64,22 @@ void EpollServer::handle_client_data(int client_sock) {
   
 }
 
+void EpollServer::run() {
+  SPDLOG_INFO("Server started with epoll");
+  epoll_event events[kMaxEvents];
+
+  while (true) {
+    int nfds = epoll_wait(epoll_fd_, events, kMaxEvents, -1);
+    for (int i = 0; i < nfds; ++i) {
+      int fd = events[i].data.fd;
+      if (fd == listen_sock_) {
+        handle_new_connection();
+      } else {
+        handle_client_data(fd);
+      }
+    }
+  }
+}
+
 
 } // namespace tt::chat::server
