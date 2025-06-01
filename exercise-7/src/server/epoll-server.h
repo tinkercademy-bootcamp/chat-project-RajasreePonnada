@@ -1,6 +1,9 @@
 #ifndef EPOLL_SERVER_H
 #define EPOLL_SERVER_H
 
+#include <unordered_map>
+#include <unordered_set>
+#include <memory>
 #include <netinet/in.h>
 #include <sys/epoll.h>
 #include <string>
