@@ -77,6 +77,23 @@ void EpollServer::handle_client_data(int client_sock) {
     return;
   }
 
+  std::string msg(buffer, len);
+  if (msg.rfind("/name ", 0) == 0) {
+    assign_username(client_sock, msg.substr(6));
+  } else if (msg.rfind("/create ", 0) == 0) {
+    std::string ch = msg.substr(8);
+    channel_mgr_->create_channel(ch);
+    channel_mgr_->join_channel(ch, client_sock);
+    client_channels_[client_sock] = ch;
+    send(client_sock, "Channel created.\n", 17, 0);
+  }else {
+    std::string user = usernames_[client_sock];
+    std::string ch = client_channels_[client_sock];
+    if (ch.empty()) {
+      send(client_sock, "You are not in a channel. Use /join first.\n", 44, 0);
+      return;
+    }
+  }
   
 }
 
