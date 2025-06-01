@@ -24,9 +24,13 @@ private:
 
   std::unordered_map<int, std::string> client_usernames_;
 
+  std::unordered_map<int, std::string> usernames_;
+
   void setup_server_socket(int port);
   void handle_new_connection();
   void handle_client_data(int client_sock);
+
+  void assign_username(int client_sock, const std::string &desired_name);
   };
 
 }
