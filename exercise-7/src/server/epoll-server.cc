@@ -107,6 +107,10 @@ void EpollServer::handle_client_data(int client_sock) {
       send(client_sock, "You are not in a channel. Use /join first.\n", 44, 0);
       return;
     }
+
+    std::string full_msg = "[" + ch + "] " + usernames_[client_sock] + ": " + msg;
+
+    broadcast_to_channel(ch, full_msg, client_sock);
   }
   
 }
