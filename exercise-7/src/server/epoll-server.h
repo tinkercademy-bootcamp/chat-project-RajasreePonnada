@@ -5,7 +5,10 @@
 #include <sys/epoll.h>
 #include <string>
 
+
 namespace tt::chat::server {
+
+  class ChannelManager;
 
 class EpollServer {
 public:
@@ -31,6 +34,8 @@ private:
   void handle_client_data(int client_sock);
 
   void assign_username(int client_sock, const std::string &desired_name);
+
+  
   };
 
 }
