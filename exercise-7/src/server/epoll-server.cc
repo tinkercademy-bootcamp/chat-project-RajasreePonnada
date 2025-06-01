@@ -37,6 +37,16 @@ void EpollServer::handle_new_connection() {
 
   }
 
+void EpollServer::handle_client_data(int client_sock) {
+  char buffer[1024];
+  ssize_t len = read(client_sock, buffer, sizeof(buffer));
+  if (len <= 0) {
+    // cleanup
+    return;
+  }
+
+  
+}
 
 
 } // namespace tt::chat::server
