@@ -32,6 +32,8 @@ void read_loop(int sock) {
   }
 }
 
+
+
 int main() {
   const int port = 8080;
   const char* server_ip = "127.0.0.1";
@@ -46,8 +48,12 @@ int main() {
 
   // --- Init ncurses ---
   initscr();
+  // cbreak();
+  // echo();
+  start_color();
+  init_pair(1, COLOR_CYAN, COLOR_BLACK);    // usernames
+  init_pair(2, COLOR_YELLOW, COLOR_BLACK);  // channel names
   cbreak();
-  echo();
   int height = LINES - 3;
   chat_win = newwin(height, COLS, 0, 0);
   input_win = newwin(3, COLS, height, 0);
@@ -58,6 +64,8 @@ int main() {
 
   // --- Start read thread ---
   std::thread reader(read_loop, sock);
+  
+
 
   // --- Input loop ---
   char input[512];
