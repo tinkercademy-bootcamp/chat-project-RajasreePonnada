@@ -21,17 +21,42 @@ void update_chat(const std::string& msg) {
   wrefresh(chat_win);
 }
 
-void read_loop(int sock) {
-  char buffer[1024];
-  while (true) {
-    ssize_t n = read(sock, buffer, sizeof(buffer) - 1);
-    if (n > 0) {
-      buffer[n] = '\0';
-      update_chat(std::string(buffer));
-    }
-  }
-}
+void read_loop(int sock, WINDOW* chat_win) {
+    char buffer[2048];
 
+    while (true) {
+        ssize_t n = read(sock, buffer, sizeof(buffer) - 1);
+        if (n <= 0) break;
+
+        buffer[n] = '\0';
+        std::string msg(buffer);
+
+        // Try to parse format: [channel] username: message
+        size_t ch_end = msg.find("] ");
+        size_t user_end = msg.find(": ", ch_end + 2);
+
+        if (msg[0] == '[' && ch_end != std::string::npos && user_end != std::string::npos) {
+            std::string channel = msg.substr(1, ch_end - 1);
+            std::string username = msg.substr(ch_end + 2, user_end - (ch_end + 2));
+            std::string content = msg.substr(user_end + 2);
+
+            wattron(chat_win, COLOR_PAIR(2)); // channel
+            wprintw(chat_win, "[%s] ", channel.c_str());
+            wattroff(chat_win, COLOR_PAIR(2));
+
+            wattron(chat_win, COLOR_PAIR(1)); // username
+            wprintw(chat_win, "%s: ", username.c_str());
+            wattroff(chat_win, COLOR_PAIR(1));
+
+            wprintw(chat_win, "%s\n", content.c_str());
+        } else {
+            // fallback
+            wprintw(chat_win, "%s\n", msg.c_str());
+        }
+
+        wrefresh(chat_win);
+    }
+}
 
 
 int main() {
