@@ -125,6 +125,15 @@ void EpollServer::handle_client_data(int client_sock) {
     file.close();
     send(client_sock, "Upload done\n", 12, 0);
     return;
+  } 
+  else if (msg == "/users") {
+    std::string ch = client_channels_[client_sock];
+    std::string list = "Users in [" + ch + "]:\n";
+    for (int fd : channel_mgr_->get_members(ch)) {
+        list += "- " + usernames_[fd] + "\n";
+    }
+    send(client_sock, list.c_str(), list.size(), 0);
+    return;
   } else {
     std::string user = usernames_[client_sock];
     std::string ch = client_channels_[client_sock];
