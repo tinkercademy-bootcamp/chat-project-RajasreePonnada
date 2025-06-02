@@ -125,14 +125,33 @@ void EpollServer::handle_client_data(int client_sock) {
     file.close();
     send(client_sock, "Upload done\n", 12, 0);
     return;
-  } 
-  else if (msg == "/users") {
+  } else if (msg == "/users") {
     std::string ch = client_channels_[client_sock];
     std::string list = "Users in [" + ch + "]:\n";
     for (int fd : channel_mgr_->get_members(ch)) {
         list += "- " + usernames_[fd] + "\n";
     }
     send(client_sock, list.c_str(), list.size(), 0);
+    return;
+  } else if (msg.rfind("/msg ", 0) == 0) {
+    size_t space_pos = msg.find(' ', 5);
+    if (space_pos != std::string::npos) {
+        std::string recipient = msg.substr(5, space_pos - 5);
+        std::string dm = "[DM] " + usernames_[client_sock] + ": " + msg.substr(space_pos + 1);
+
+        int target_fd = -1;
+        for (const auto& [fd, uname] : usernames_) {
+            if (uname == recipient) {
+                target_fd = fd;
+                break;
+            }
+        }
+
+        if (target_fd != -1)
+            send(target_fd, dm.c_str(), dm.size(), 0);
+        else
+            send(client_sock, "User not found.\n", 17, 0);
+    }
     return;
   } else {
     std::string user = usernames_[client_sock];
