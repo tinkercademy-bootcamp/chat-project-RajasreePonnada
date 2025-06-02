@@ -88,7 +88,11 @@ int main() {
   wrefresh(input_win);
 
   // --- Start read thread ---
-  std::thread reader(read_loop, sock);
+  WINDOW* chat_win = newwin(LINES - 3, COLS, 0, 0);  // window occupying most of the terminal
+  scrollok(chat_win, TRUE);  // TRUE - Allow scrolling when text exceeds the window
+
+  std::thread reader(read_loop, sock, chat_win);  // Passing the window to the thread
+
   
 
 
