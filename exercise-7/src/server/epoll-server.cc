@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <iostream>
 #include <cstring>
+#include <fstream>
 
 namespace tt::chat::server {
 
@@ -112,6 +113,18 @@ void EpollServer::handle_client_data(int client_sock) {
         "/sendfile <filename> - Upload file\n"
         "/help                - Show this help message\n";
     send(client_sock, help_text.c_str(), help_text.size(), 0);
+  } else if (msg.rfind("/sendfile ", 0) == 0) {
+    std::string filename = msg.substr(10);
+    std::ofstream file("uploads/" + filename, std::ios::binary);
+    char filebuf[1024];
+    ssize_t n;
+    while ((n = read(client_sock, filebuf, sizeof(filebuf))) > 0) {
+        file.write(filebuf, n);
+        if (n < 1024) break; // crude end-of-file logic
+    }
+    file.close();
+    send(client_sock, "Upload done\n", 12, 0);
+    return;
   } else {
     std::string user = usernames_[client_sock];
     std::string ch = client_channels_[client_sock];
