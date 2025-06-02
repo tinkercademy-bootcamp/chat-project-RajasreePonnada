@@ -100,6 +100,18 @@ void EpollServer::handle_client_data(int client_sock) {
     std::string out = "Channels:\n";
     for (auto &ch : list) out += "- " + ch + "\n";
     send(client_sock, out.c_str(), out.size(), 0);
+  } 
+    else if (msg == "/help") {
+    std::string help_text =
+        "Available commands:\n"
+        "/list                 - List available channels\n"
+        "/create <name>       - Create a new channel\n"
+        "/join <name>         - Join a channel\n"
+        "/users               - List users in current channel\n"
+        "/msg @user <message> - Send a private message\n"
+        "/sendfile <filename> - Upload file\n"
+        "/help                - Show this help message\n";
+    send(client_sock, help_text.c_str(), help_text.size(), 0);
   } else {
     std::string user = usernames_[client_sock];
     std::string ch = client_channels_[client_sock];
