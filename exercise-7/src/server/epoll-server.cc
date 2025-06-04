@@ -5,10 +5,6 @@
 #include "channel_manager.h"
 
 #include <spdlog/spdlog.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <iostream>
-#include <cstring>
 #include <fstream>
 
 namespace tt::chat::server {
