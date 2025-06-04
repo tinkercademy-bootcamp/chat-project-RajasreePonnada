@@ -28,6 +28,27 @@
   in the channel
 - You are free to come up with any other commands that you like
 - You can use any directory structure or any makefile that you like
+
+I think about going like this as in exercise-5:
+```
+epoll-chat/
+│
+├── src/
+│   ├── server/
+│   │   ├── channel_manager.cc / channel_manager.h
+│   │   ├── epoll-server.cc / epoll-server.h
+│   ├── client/
+│   │   ├── chat-client.cc / chat-client.h
+│   ├── net/
+│   │   ├── chat-sockets.cc / chat-sockets.h
+│   ├── client-main.cc
+│   ├── server-main.cc
+│   └── utils.h
+├── .gitignore
+├── Makefile
+├── README.md
+
+```
 - You can use any 3rd party open source library that you like
 - However for the purposes of this bootcamp, please stay with make and bash 
   scripts

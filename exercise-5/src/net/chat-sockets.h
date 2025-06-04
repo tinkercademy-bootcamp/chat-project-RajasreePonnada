@@ -12,7 +12,7 @@
 namespace tt::chat::net {
 
 int create_socket();
-
+void check_error(bool test, std::string error_message);
 sockaddr_in create_address(int port);
 
 } // namespace tt::chat::net
