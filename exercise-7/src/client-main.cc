@@ -20,7 +20,17 @@ std::mutex g_ncurses_mutex;
 std::atomic<bool> g_client_running{true}; // Initialize to true
 
 int main(int argc, char* argv[]) {
-    // Suppress unused parameter warnings for now
+
+    // --- Init ncurses ---
+    initscr();
+    if (has_colors()) {
+        start_color();
+        // Basic color pairs (can be expanded later)
+        init_pair(1, COLOR_CYAN, COLOR_BLACK);
+        init_pair(2, COLOR_YELLOW, COLOR_BLACK);
+    }
+    cbreak(); // Line buffering off
+    echo(); 
     (void)argc;
     (void)argv;
 
