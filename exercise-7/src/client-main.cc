@@ -19,7 +19,42 @@ WINDOW* g_input_win = nullptr;
 std::mutex g_ncurses_mutex;
 std::atomic<bool> g_client_running{true}; // Initialize to true
 
+void read_loop(int client_socket_fd) {
+    char buffer[2048];
+    SPDLOG_INFO("Read loop started for FD {}", client_socket_fd);
+    if (client_socket_fd < 0) { 
+      g_client_running = false; 
+      return; 
+    }
+
+    while (g_client_running) {
+        ssize_t n = read(client_socket_fd, buffer, sizeof(buffer) - 1);
+        if (!g_client_running) break;
+
+        if (n > 0) {
+            std::string msg(buffer, n);
+            std::lock_guard<std::mutex> lock(g_ncurses_mutex);
+            if (g_chat_win) {
+                wprintw(g_chat_win, "Server: %s\n", msg.c_str()); // Simple display
+                wrefresh(g_chat_win);
+            }
+        } else if (n == 0) { /* server closed */ g_client_running = false; break; }
+        else { /* read error */ if (errno == EINTR) continue; g_client_running = false; break; }
+    }
+    SPDLOG_INFO("Read loop terminated.");
+}
+
 int main(int argc, char* argv[]) {
+    const char* server_ip = "127.0.0.1";
+    int port = 8080;
+
+    if (argc > 1) server_ip = argv[1];
+    if (argc > 2) {
+        try { port = std::stoi(argv[2]); }
+        catch (const std::exception& e) {
+            std::cerr << "Invalid port: " << argv[2] << ". Using default " << port << std::endl;
+        }
+    }
 
     // --- Init ncurses ---
     initscr();
@@ -54,23 +89,10 @@ int main(int argc, char* argv[]) {
     wrefresh(g_chat_win);
     wrefresh(g_input_win);
 
-    (void)argc;
-    (void)argv;
-
-
     spdlog::set_level(spdlog::level::info);
     SPDLOG_INFO("Client application starting...");
 
-    const char* server_ip = "127.0.0.1";
-    int port = 8080;
-
-    if (argc > 1) server_ip = argv[1];
-    if (argc > 2) {
-        try { port = std::stoi(argv[2]); }
-        catch (const std::exception& e) {
-            std::cerr << "Invalid port: " << argv[2] << ". Using default " << port << std::endl;
-        }
-    }
+    
     SPDLOG_INFO("Attempting to connect to server {}:{}", server_ip, port);
 
     std::unique_ptr<tt::chat::client::Client> chat_client_ptr;
@@ -87,6 +109,9 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
+    int client_socket_fd = chat_client_ptr->get_socket_fd();
+    std::thread reader_thread(read_loop, client_socket_fd);
+    
     {
         std::lock_guard<std::mutex> lock(g_ncurses_mutex);
         if (g_chat_win) {
@@ -146,6 +171,23 @@ int main(int argc, char* argv[]) {
                 break;
             }
         }
+    }
+
+    // After input loop finishes (due to /quit or error)
+    SPDLOG_INFO("Main loop ended. Signaling reader thread to stop.");
+    g_client_running = false; // Signal reader thread
+
+    // Shutdown socket to unblock read() in reader_thread
+    if (client_socket_fd >= 0) {
+        if (shutdown(client_socket_fd, SHUT_RDWR) == -1 && errno != ENOTCONN) {
+             SPDLOG_WARN("Socket shutdown failed: {}", strerror(errno));
+        }
+    }
+
+    if (reader_thread.joinable()) {
+        SPDLOG_DEBUG("Joining reader thread...");
+        reader_thread.join();
+        SPDLOG_DEBUG("Reader thread joined.");
     }
 
     if (g_input_win) { delwin(g_input_win); g_input_win = nullptr; }
