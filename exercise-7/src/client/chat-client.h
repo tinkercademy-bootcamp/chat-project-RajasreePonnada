@@ -3,7 +3,6 @@
 
 #include <netinet/in.h>
 #include <string>
-#include <stdexcept> // For std::runtime_error
 
 namespace tt::chat::client {
 class Client {
@@ -21,12 +20,13 @@ public:
    * @param message The message string to send.
    * @throws std::runtime_error if sending fails or client is not connected.
    */
-  std::string send_and_receive_message(const std::string &message);
+  void send_message(const std::string &message);
+  int get_socket_fd() const; // Getter for the socket
   // Destroys the Client object, ensuring the socket is closed.
   ~Client();
 
 private:
-  int socket_ = -1;
+  int socket_;
   /**
    * Creates a server address structure (sockaddr_in).
    * @param server_ip The IP address of the server.
