@@ -112,7 +112,6 @@ void EpollServer::handle_client_data(int client_sock) {
         "/msg @user <message> - Send a private message\n"
         "/sendfile <filename> - Upload file\n"
         "/help                - Show this help message\n";
-        "/help in commands   - The help commandsmust be displayed in the help menu"
     send(client_sock, help_text.c_str(), help_text.size(), 0);
   } else if (msg.rfind("/sendfile ", 0) == 0) {
     std::string filename = msg.substr(10);
