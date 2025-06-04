@@ -11,17 +11,14 @@ CXX_RELEASE_FLAGS :=-O3
 
 CXXFLAGS += $(CXX_DEBUG_FLAGS)
 
+
+
 # The linker flags. These are passed to the linker when we link our object files together.
-LDFLAGS := -fsanitize=address
+LDFLAGS := -fsanitize=address 
 
 LIBS:= fmt spdlog
 LIB_FLAGS := $(addprefix -l,$(LIBS))
 LDFLAGS += $(LIB_FLAGS) -lncurses -pthread
-
-
-LIBS:= fmt spdlog
-LIB_FLAGS := $(addprefix -l,$(LIBS))
-LDFLAGS += $(LIB_FLAGS)
 
 BUILD_DIR := build
 SRC_DIR := src
