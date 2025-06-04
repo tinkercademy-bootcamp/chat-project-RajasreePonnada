@@ -128,16 +128,25 @@ int main(int argc, char* argv[]) {
         }
 
         if (!message_str.empty()) {
-            // Echo to local chat window for now
-            std::lock_guard<std::mutex> lock(g_ncurses_mutex);
-            if (g_chat_win) {
-                wprintw(g_chat_win, "You typed: %s\n", message_str.c_str());
-                wrefresh(g_chat_win);
+            try {
+                chat_client_ptr->send_message(message_str);
+                // Still echo locally, or wait for server to echo back via read_loop later
+                std::lock_guard<std::mutex> lock(g_ncurses_mutex);
+                if (g_chat_win) {
+                    wprintw(g_chat_win, "Sent to server: %s\n", message_str.c_str());
+                    wrefresh(g_chat_win);
+                }
+            } catch (const std::runtime_error& e) {
+                std::lock_guard<std::mutex> lock(g_ncurses_mutex);
+                if (g_chat_win) {
+                    wprintw(g_chat_win, "--- Error sending message: %s ---\n", e.what());
+                    wrefresh(g_chat_win);
+                }
+                g_client_running = false; // Assume connection lost
+                break;
             }
         }
     }
-
-    // chat_client_ptr will auto-disconnect on exit due to unique_ptr destructor
 
     if (g_input_win) { delwin(g_input_win); g_input_win = nullptr; }
     if (g_chat_win) { delwin(g_chat_win); g_chat_win = nullptr; }
