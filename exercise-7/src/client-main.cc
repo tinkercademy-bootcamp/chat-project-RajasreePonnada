@@ -87,6 +87,56 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
+    {
+        std::lock_guard<std::mutex> lock(g_ncurses_mutex);
+        if (g_chat_win) {
+            wprintw(g_chat_win, "Ncurses UI initialized. Type /quit to exit.\n");
+            wrefresh(g_chat_win);
+        }
+    }
+
+    char input_buffer[512];
+    while (g_client_running) { // Use the atomic flag
+        {
+            std::lock_guard<std::mutex> lock(g_ncurses_mutex);
+            if (!g_input_win) { g_client_running = false; break; }
+            werase(g_input_win);
+            box(g_input_win, 0, 0);
+            mvwprintw(g_input_win, 1, 2, "> ");
+            wrefresh(g_input_win);
+        }
+
+        int get_result = wgetnstr(g_input_win, input_buffer, sizeof(input_buffer) - 1);
+
+        if (!g_client_running) break; // Check after wgetnstr in case of signal
+
+        if (get_result == ERR) {
+            // Basic error handling for now, can be refined
+            std::lock_guard<std::mutex> lock(g_ncurses_mutex);
+            if (g_chat_win) {
+                wprintw(g_chat_win, "--- Error reading input ---\n");
+                wrefresh(g_chat_win);
+            }
+            g_client_running = false; // Exit on error
+            break;
+        }
+
+        std::string message_str(input_buffer);
+        if (message_str == "/quit") {
+            g_client_running = false;
+            break;
+        }
+
+        if (!message_str.empty()) {
+            // Echo to local chat window for now
+            std::lock_guard<std::mutex> lock(g_ncurses_mutex);
+            if (g_chat_win) {
+                wprintw(g_chat_win, "You typed: %s\n", message_str.c_str());
+                wrefresh(g_chat_win);
+            }
+        }
+    }
+
     // chat_client_ptr will auto-disconnect on exit due to unique_ptr destructor
 
     if (g_input_win) { delwin(g_input_win); g_input_win = nullptr; }
