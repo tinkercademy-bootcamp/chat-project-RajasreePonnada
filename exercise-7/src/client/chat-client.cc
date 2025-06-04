@@ -2,33 +2,27 @@
 #include "../net/chat-sockets.h"
 #include "../utils.h"
 
-tt::chat::client::Client::Client(int port,
-                                         const std::string &server_address)
+#include <sys/socket.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+tt::chat::client::Client::Client(int port, const std::string &server_address)
     : socket_{tt::chat::net::create_socket()} {
   sockaddr_in address = create_server_address(server_address, port);
   connect_to_server(socket_, address);
 }
 
-std::string tt::chat::client::Client::send_and_receive_message(
-    const std::string &message) {
-  using namespace tt::chat;
-  char recv_buffer[kBufferSize] = {0};
-
-  // Send the message to the server
-  send(socket_, message.c_str(), message.size(), 0);
-  std::cout << "Sent: " << message << "\n";
-
-  // Receive response from the server
-  ssize_t read_size = read(socket_, recv_buffer, kBufferSize);
-  if (read_size > 0) {
-    return std::string(recv_buffer);
-  } else if (read_size == 0) {
-    return "Server closed connection.\n";
-  } else {
-    return "Read error.\n";
+void tt::chat::client::Client::send_message(const std::string &message) {
+  ssize_t bytes_sent = send(socket_, message.c_str(), message.length(), 0);
+  if (bytes_sent < 0) {
+      tt::chat::check_error(true, "Send failed on client socket.");
   }
+
 }
 
+int tt::chat::client::Client::get_socket_fd() const {
+  return socket_;
+}
 tt::chat::client::Client::~Client() { close(socket_); }
 
 sockaddr_in tt::chat::client::Client::create_server_address(
