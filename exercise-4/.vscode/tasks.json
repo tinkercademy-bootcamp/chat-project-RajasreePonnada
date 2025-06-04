@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Client",
+      "type": "shell",
+      "command": "g++",
+      "args": [
+        "${workspaceFolder}/src/tcp_echo_client.cpp",
+        "${workspaceFolder}/src/socket_utilities.cc",
+        "-o",
+        "${workspaceFolder}/src/client"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Build Server",
+      "type": "shell",
+      "command": "g++",
+      "args": [
+        "${workspaceFolder}/src/tcp_echo_server.cpp",
+        "${workspaceFolder}/src/socket_utilities.cc",
+        "-o",
+        "${workspaceFolder}/src/server"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}

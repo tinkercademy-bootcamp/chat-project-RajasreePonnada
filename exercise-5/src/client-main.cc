@@ -8,6 +8,8 @@
 #include <unistd.h>
 
 #include "net/chat-sockets.h"
+#include "client/client.h"
+#include <iostream>
 #include "utils.h"
 
 sockaddr_in create_server_address(const std::string &server_ip, int port) {
@@ -62,14 +64,18 @@ int main(int argc, char *argv[]) {
   const int kPort = 8080;
   const std::string kServerAddress = "127.0.0.1";
 
-  std::string message = read_args(argc, argv);
+  // std::string message = read_args(argc, argv);
 
-  int my_socket = tt::chat::net::create_socket();
-  sockaddr_in server_address = create_server_address(kServerAddress, kPort);
+  // int my_socket = tt::chat::net::create_socket();
+  // sockaddr_in server_address = create_server_address(kServerAddress, kPort);
 
-  connect_to_server(my_socket, server_address);
-  send_and_receive_message(my_socket, message);
-  close(my_socket);
-
+  // connect_to_server(my_socket, server_address);
+  // send_and_receive_message(my_socket, message);
+  // close(my_socket);
+  std::string message = (argc > 1) ? argv[1] : "Hello from client";
+  tt::chat::Client client(kServerAddress, kPort);
+  client.run(message);
   return 0;
+
+  // return 0;
 }
